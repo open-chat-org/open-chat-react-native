@@ -1,20 +1,17 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-get-random-values';
+import { NativeBaseProvider } from 'native-base';
+import { useColorScheme } from 'react-native';
+import { AppRouter } from './src/app/router/AppRouter';
+import { app_themes, ThemeMode } from './src/app/theme/theme';
 
 export default function App() {
+  const system_color_scheme = useColorScheme();
+  const theme_mode: ThemeMode =
+    system_color_scheme === 'light' ? 'light' : 'dark';
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NativeBaseProvider theme={app_themes[theme_mode]}>
+      <AppRouter theme_mode={theme_mode} />
+    </NativeBaseProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
