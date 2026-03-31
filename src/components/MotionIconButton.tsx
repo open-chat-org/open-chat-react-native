@@ -33,6 +33,14 @@ type MotionIconButtonProps = {
   w?: number | string;
 };
 
+function to_native_base_size(value?: number | string) {
+  if (typeof value === 'number') {
+    return `${value}px`;
+  }
+
+  return value;
+}
+
 export function MotionIconButton({
   accessibility_label,
   bg,
@@ -56,8 +64,8 @@ export function MotionIconButton({
 }: MotionIconButtonProps) {
   const scale_animation = useRef(new Animated.Value(1)).current;
   const opacity_animation = useRef(new Animated.Value(1)).current;
-  const resolved_height = h ?? size;
-  const resolved_width = w ?? size;
+  const resolved_height = to_native_base_size(h ?? size);
+  const resolved_width = to_native_base_size(w ?? size);
 
   const animate_to = (next_scale: number, next_opacity: number) => {
     Animated.parallel([

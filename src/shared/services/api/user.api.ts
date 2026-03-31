@@ -1,5 +1,6 @@
 import {
   SaveUserProfilePayload,
+  UserKeyBundle,
   UserSearchResult,
   UserProfile,
 } from '../../../types/user.types';
@@ -26,6 +27,16 @@ export async function search_users(query: string) {
   const response = await api_client.get<UserSearchResult[]>('/user/search', {
     params: {
       query,
+    },
+  });
+
+  return response.data;
+}
+
+export async function fetch_user_key_bundle(public_key: string) {
+  const response = await api_client.get<UserKeyBundle>('/user/key_bundle', {
+    params: {
+      public_key,
     },
   });
 

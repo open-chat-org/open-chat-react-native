@@ -1,6 +1,6 @@
 import {
-  get_private_key,
-  get_public_key,
+  get_ed25519_private_key,
+  get_ed25519_public_key,
   get_realtime_session_id,
   save_realtime_session_id,
 } from '../storage/private-key.storage';
@@ -82,8 +82,8 @@ export class RealtimeClient {
 
       const [public_key, private_key, last_session_id, expected_server_public_key] =
         await Promise.all([
-          get_public_key(),
-          get_private_key(),
+          get_ed25519_public_key(),
+          get_ed25519_private_key(),
           get_realtime_session_id(),
           this.options.ensure_server_public_key(),
         ]);

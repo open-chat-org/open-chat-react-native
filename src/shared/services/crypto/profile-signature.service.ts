@@ -1,4 +1,4 @@
-import { get_private_key } from '../storage/private-key.storage';
+import { get_ed25519_private_key } from '../storage/private-key.storage';
 import { sign_sha256_message } from './ed25519.service';
 
 type SignableProfilePayload = {
@@ -39,10 +39,10 @@ export function create_profile_signature_message(payload: SignableProfilePayload
 export async function create_signed_profile_payload(
   payload: SignableProfilePayload,
 ): Promise<SignedProfilePayload> {
-  const private_key = await get_private_key();
+  const private_key = await get_ed25519_private_key();
 
   if (!private_key) {
-    throw new Error('Private key is not available on this device.');
+    throw new Error('Ed25519 private key is not available on this device.');
   }
 
   const normalized_payload = normalize_profile_payload(payload);

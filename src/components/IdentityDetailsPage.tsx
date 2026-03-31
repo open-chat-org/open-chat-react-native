@@ -5,7 +5,7 @@ import { Box, Button, HStack, Text, VStack } from 'native-base';
 import { useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
 import { ThemeMode } from '../app/theme/theme';
-import { get_private_key } from '../shared/services/storage/private-key.storage';
+import { get_ed25519_private_key } from '../shared/services/storage/private-key.storage';
 import { truncate_hex } from '../shared/utils/hex';
 import { AppIcon } from './AppIcon';
 
@@ -39,10 +39,10 @@ export function IdentityDetailsPage({
       set_export_error('');
       set_export_message('');
 
-      const private_key = await get_private_key();
+      const private_key = await get_ed25519_private_key();
 
       if (!private_key) {
-        throw new Error('Private key is not available on this device.');
+        throw new Error('Ed25519 private key is not available on this device.');
       }
 
       const can_share = await Sharing.isAvailableAsync();

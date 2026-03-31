@@ -25,3 +25,8 @@ export type UserSearchResult = {
   public_key: string;
   username: string | null;
 };
+
+export type UserKeyBundle = {
+  public_key: string;
+  x25519_public_key: string;
+};

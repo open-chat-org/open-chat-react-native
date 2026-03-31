@@ -133,7 +133,7 @@ export function AppRouter({ theme_mode }: AppRouterProps) {
   return (
     <AppShellProvider
       value={{
-        public_key: identity.public_key ?? '',
+        public_key: identity.ed25519_public_key ?? '',
         refresh_session,
         theme_mode,
       }}

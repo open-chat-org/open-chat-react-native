@@ -1,5 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
-import { get_public_key } from '../services/storage/private-key.storage';
+import { get_ed25519_public_key } from '../services/storage/private-key.storage';
 import { env } from './env';
 
 export const api_client = axios.create({
@@ -7,7 +7,7 @@ export const api_client = axios.create({
 });
 
 api_client.interceptors.request.use(async (config) => {
-  const public_key = await get_public_key();
+  const public_key = await get_ed25519_public_key();
   const headers = AxiosHeaders.from(config.headers);
 
   headers.set('Accept', 'application/json');

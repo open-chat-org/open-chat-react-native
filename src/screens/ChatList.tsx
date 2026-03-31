@@ -8,6 +8,7 @@ import { ChatListItem } from '../components/ChatListItem';
 import { UserSearchResultItem } from '../components/UserSearchResultItem';
 import { useChatList } from '../hooks/useChatList';
 import { useUserSearch } from '../hooks/useUserSearch';
+import { fetch_user_key_bundle } from '../shared/services/api/user.api';
 import { create_or_open_user_chat_stub } from '../services/local-chat-database.service';
 import { RootStackParamList } from '../types/navigation.types';
 
@@ -50,9 +51,11 @@ export function ChatList({ theme_mode }: ChatListProps) {
   ) => {
     try {
       set_chat_stub_error('');
+      const user_key_bundle = await fetch_user_key_bundle(public_key);
       const chat_summary = await create_or_open_user_chat_stub({
         name,
         public_key,
+        x25519_public_key: user_key_bundle.x25519_public_key,
         username,
       });
       await refresh_chats();
