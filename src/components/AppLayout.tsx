@@ -4,17 +4,28 @@ import { Box, VStack } from 'native-base';
 import { ReactNode } from 'react';
 import { ThemeMode } from '../app/theme/theme';
 import { get_route_definition, tab_route_config } from '../shared/config/routes.config';
+import { AppIconName } from '../types/icon.types';
 import { RootStackParamList, TabRouteName } from '../types/navigation.types';
 import { AppHeader } from './AppHeader';
 import { BottomTabBar } from './BottomTabBar';
 
 type AppLayoutProps = {
   children: ReactNode;
+  header_context_label?: string;
+  header_right_actions?: {
+    icon: AppIconName;
+    label?: string;
+    on_press?: () => void;
+    tone?: 'primary' | 'secondary';
+  }[];
+  header_subtitle?: string;
+  header_title?: string;
   route_name: keyof RootStackParamList;
   theme_mode: ThemeMode;
 };
 
 const header_context_labels: Record<keyof RootStackParamList, string> = {
+  chat_thread: 'Conversation',
   chat_list: 'Encrypted',
   create_account: 'Welcome',
   identity_details: 'Identity',
@@ -23,6 +34,7 @@ const header_context_labels: Record<keyof RootStackParamList, string> = {
 };
 
 const header_subtitles: Record<keyof RootStackParamList, string> = {
+  chat_thread: 'Local encrypted thread preview.',
   chat_list: 'Your local conversations and network-ready contacts.',
   create_account: 'Create a device identity to start secure messaging.',
   identity_details: 'Share your public key and protect your private key.',
@@ -30,16 +42,40 @@ const header_subtitles: Record<keyof RootStackParamList, string> = {
   settings: 'Manage profile, keys, and privacy preferences.',
 };
 
-export function AppLayout({ children, route_name, theme_mode }: AppLayoutProps) {
+export function AppLayout({
+  children,
+  header_context_label,
+  header_right_actions,
+  header_subtitle,
+  header_title,
+  route_name,
+  theme_mode,
+}: AppLayoutProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route_definition = get_route_definition(route_name);
   const can_go_back = !route_definition?.needs_tab_bar && navigation.canGoBack();
-  const right_actions =
+  const default_right_actions =
     route_name === 'chat_list'
-      ? [{ label: '+', tone: 'primary' as const }, { label: '...' }]
+      ? [
+          {
+            icon: 'plus' as const,
+            label: 'Create conversation',
+            tone: 'primary' as const,
+          },
+          {
+            icon: 'dots-three-outline' as const,
+            label: 'More options',
+          },
+        ]
       : route_name === 'settings'
-        ? [{ label: '...' }]
+        ? [
+            {
+              icon: 'dots-three-outline' as const,
+              label: 'More options',
+            },
+          ]
         : [];
+  const right_actions = header_right_actions ?? default_right_actions;
 
   return (
     <Box flex={1} safeArea bg={theme_mode === 'dark' ? 'surface.900' : 'surface.50'}>
@@ -56,12 +92,14 @@ export function AppLayout({ children, route_name, theme_mode }: AppLayoutProps) 
           >
             <AppHeader
               can_go_back={can_go_back}
-              context_label={header_context_labels[route_name]}
+              context_label={
+                header_context_label ?? header_context_labels[route_name]
+              }
               on_go_back={() => navigation.goBack()}
               right_actions={right_actions}
-              subtitle={header_subtitles[route_name]}
+              subtitle={header_subtitle ?? header_subtitles[route_name]}
               theme_mode={theme_mode}
-              title={route_definition?.name ?? 'Open Chat'}
+              title={header_title ?? route_definition?.name ?? 'Open Chat'}
             />
           </Box>
         </Box>

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { initialize_local_chat_database, seed_dummy_chats } from '../services/local-chat-database.service';
+import {
+  initialize_local_chat_database,
+  remove_dummy_chats,
+} from '../services/local-chat-database.service';
 import { get_local_identity } from '../shared/services/storage/private-key.storage';
 import { LocalIdentity } from '../types/account.types';
 
@@ -15,7 +18,7 @@ export function useAppSession() {
     try {
       set_is_loading_session(true);
       await initialize_local_chat_database();
-      await seed_dummy_chats();
+      await remove_dummy_chats();
 
       const local_identity = await get_local_identity();
       set_identity(local_identity);

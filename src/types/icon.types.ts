@@ -1,0 +1,15 @@
+export type AppIconName =
+  | 'caret-left'
+  | 'caret-right'
+  | 'chat-circle-dots'
+  | 'copy'
+  | 'dots-three-outline'
+  | 'download-simple'
+  | 'gear-six'
+  | 'key'
+  | 'microphone'
+  | 'paper-plane-tilt'
+  | 'phone'
+  | 'plus'
+  | 'user-circle'
+  | 'video-camera';

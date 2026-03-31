@@ -1,6 +1,8 @@
 import * as SQLite from 'expo-sqlite';
 import { env } from '../shared/config/env';
-import { ChatSummary } from '../types/chat.types';
+import { truncate_hex } from '../shared/utils/hex';
+import { ChatMessage, ChatSummary } from '../types/chat.types';
+import { UserSearchResult } from '../types/user.types';
 
 let database_promise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -38,91 +40,17 @@ export async function initialize_local_chat_database() {
   `);
 }
 
-export async function seed_dummy_chats() {
+export async function remove_dummy_chats() {
   const database = await get_database();
-  const existing_chat = await database.getFirstAsync<{ count: number }>(
-    'SELECT COUNT(*) as count FROM chats',
-  );
 
-  if ((existing_chat?.count ?? 0) > 0) {
-    return;
-  }
+  await database.execAsync(`
+    DELETE FROM messages
+    WHERE chat_id IN ('chat_1', 'chat_2', 'chat_3')
+       OR id IN ('message_1', 'message_2', 'message_3');
 
-  const chats: ChatSummary[] = [
-    {
-      id: 'chat_1',
-      title: 'Mila Hart',
-      subtitle: 'Hosted on community node',
-      last_message_preview: 'Encrypted hello from a dummy chat seed.',
-      last_message_at: '09:24 PM',
-      unread_count: 2,
-    },
-    {
-      id: 'chat_2',
-      title: 'Core Builders',
-      subtitle: 'Shared room',
-      last_message_preview: 'Protocol notes are ready for review.',
-      last_message_at: '08:10 PM',
-      unread_count: 0,
-    },
-    {
-      id: 'chat_3',
-      title: 'Self Notes',
-      subtitle: 'Local encrypted vault',
-      last_message_preview: 'Remember to test message sync on another node.',
-      last_message_at: 'Yesterday',
-      unread_count: 0,
-    },
-  ];
-
-  for (const chat of chats) {
-    await database.runAsync(
-      `INSERT INTO chats (id, title, subtitle, last_message_preview, last_message_at, unread_count)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      chat.id,
-      chat.title,
-      chat.subtitle,
-      chat.last_message_preview,
-      chat.last_message_at,
-      chat.unread_count,
-    );
-  }
-
-  const dummy_messages = [
-    {
-      id: 'message_1',
-      chat_id: 'chat_1',
-      sender_public_key: 'public_key_mila',
-      encrypted_content: 'encrypted_payload_message_1',
-      created_at: '2026-03-30T09:24:00.000Z',
-    },
-    {
-      id: 'message_2',
-      chat_id: 'chat_2',
-      sender_public_key: 'public_key_core_builders',
-      encrypted_content: 'encrypted_payload_message_2',
-      created_at: '2026-03-30T08:10:00.000Z',
-    },
-    {
-      id: 'message_3',
-      chat_id: 'chat_3',
-      sender_public_key: 'public_key_self_notes',
-      encrypted_content: 'encrypted_payload_message_3',
-      created_at: '2026-03-29T18:30:00.000Z',
-    },
-  ];
-
-  for (const message of dummy_messages) {
-    await database.runAsync(
-      `INSERT INTO messages (id, chat_id, sender_public_key, encrypted_content, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
-      message.id,
-      message.chat_id,
-      message.sender_public_key,
-      message.encrypted_content,
-      message.created_at,
-    );
-  }
+    DELETE FROM chats
+    WHERE id IN ('chat_1', 'chat_2', 'chat_3');
+  `);
 }
 
 export async function get_chat_summaries() {
@@ -133,6 +61,92 @@ export async function get_chat_summaries() {
      FROM chats
      ORDER BY
        CASE WHEN unread_count > 0 THEN 0 ELSE 1 END,
-       id ASC`,
+      id ASC`,
   );
+}
+
+export async function get_chat_summary_by_id(chat_id: string) {
+  const database = await get_database();
+
+  return database.getFirstAsync<ChatSummary>(
+    `SELECT id, title, subtitle, last_message_preview, last_message_at, unread_count
+     FROM chats
+     WHERE id = ?`,
+    chat_id,
+  );
+}
+
+export async function get_chat_messages(chat_id: string) {
+  const database = await get_database();
+
+  return database.getAllAsync<ChatMessage>(
+    `SELECT id, chat_id, sender_public_key, encrypted_content, created_at
+     FROM messages
+     WHERE chat_id = ?
+     ORDER BY created_at ASC`,
+    chat_id,
+  );
+}
+
+function create_user_chat_stub_id(public_key: string) {
+  return `dm:${public_key}`;
+}
+
+function create_user_chat_title(user: UserSearchResult) {
+  const normalized_name = user.name?.trim();
+
+  if (normalized_name) {
+    return normalized_name;
+  }
+
+  const normalized_username = user.username?.trim();
+
+  if (normalized_username) {
+    return `@${normalized_username}`;
+  }
+
+  return truncate_hex(user.public_key, 8);
+}
+
+function create_user_chat_subtitle(user: UserSearchResult) {
+  const normalized_username = user.username?.trim();
+
+  if (normalized_username) {
+    return `@${normalized_username}`;
+  }
+
+  return 'Discovered on this node';
+}
+
+export async function create_or_open_user_chat_stub(user: UserSearchResult) {
+  const database = await get_database();
+  const chat_id = create_user_chat_stub_id(user.public_key);
+  const chat_summary: ChatSummary = {
+    id: chat_id,
+    last_message_at: '',
+    last_message_preview: 'No messages yet',
+    subtitle: create_user_chat_subtitle(user),
+    title: create_user_chat_title(user),
+    unread_count: 0,
+  };
+
+  await database.runAsync(
+    `INSERT OR IGNORE INTO chats (id, title, subtitle, last_message_preview, last_message_at, unread_count)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    chat_summary.id,
+    chat_summary.title,
+    chat_summary.subtitle,
+    chat_summary.last_message_preview,
+    chat_summary.last_message_at,
+    chat_summary.unread_count,
+  );
+
+  const stored_chat = await database.getFirstAsync<ChatSummary>(
+    `SELECT id, title, subtitle, last_message_preview, last_message_at, unread_count
+     FROM chats
+     WHERE id = ?`,
+    chat_id,
+  );
+
+  return stored_chat ?? chat_summary;
 }

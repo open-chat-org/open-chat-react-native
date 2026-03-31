@@ -1,4 +1,9 @@
 export type RootStackParamList = {
+  chat_thread: {
+    chat_id: string;
+    chat_subtitle?: string;
+    chat_title?: string;
+  };
   create_account: undefined;
   chat_list: undefined;
   settings: undefined;

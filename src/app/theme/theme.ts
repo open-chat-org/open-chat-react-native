@@ -29,6 +29,66 @@ const shared_colors = {
   },
 };
 
+const input_component_theme = {
+  baseStyle: (props: { colorMode?: ThemeMode }) => {
+    const is_dark = props.colorMode === 'dark';
+
+    return {
+      fontFamily: 'body',
+      px: '4',
+      py: '3',
+      borderRadius: 'full',
+      overflow: 'hidden',
+      color: is_dark ? 'white' : 'surface.900',
+      bg: is_dark ? 'surface.800' : 'surface.50',
+      borderWidth: '1',
+      borderColor: is_dark ? 'panel.50' : 'surface.200',
+      placeholderTextColor: is_dark ? '#8da4b5' : '#6b7f90',
+      _input: {
+        bg: 'transparent',
+        flex: 1,
+        h: '100%',
+        w: '100%',
+      },
+      _stack: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        overflow: 'hidden',
+      },
+      _focus: {
+        bg: is_dark ? 'surface.800' : 'surface.50',
+        borderColor: 'brand.500',
+      },
+      _hover: {
+        borderColor: is_dark ? 'panel.50' : 'surface.200',
+      },
+      _invalid: {
+        borderColor: 'red.500',
+      },
+      _disabled: {
+        opacity: 0.6,
+      },
+    };
+  },
+  defaultProps: {
+    rounded: 'full',
+    variant: 'outline',
+  },
+  variants: {
+    outline: {},
+    unstyled: {
+      bg: 'transparent',
+      borderWidth: '0',
+      px: '0',
+      py: '0',
+      _focus: {
+        bg: 'transparent',
+        borderColor: 'transparent',
+      },
+    },
+  },
+};
+
 export const app_themes = {
   light: extendTheme({
     radii: {
@@ -59,12 +119,7 @@ export const app_themes = {
           rounded: 'full',
         },
       },
-      Input: {
-        defaultProps: {
-          rounded: 'full',
-          borderWidth: 0,
-        },
-      },
+      Input: input_component_theme,
     },
   }),
   dark: extendTheme({
@@ -96,12 +151,7 @@ export const app_themes = {
           rounded: 'full',
         },
       },
-      Input: {
-        defaultProps: {
-          rounded: 'full',
-          borderWidth: 0,
-        },
-      },
+      Input: input_component_theme,
     },
   }),
 };

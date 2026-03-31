@@ -7,6 +7,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { ThemeMode } from '../app/theme/theme';
 import { get_private_key } from '../shared/services/storage/private-key.storage';
 import { truncate_hex } from '../shared/utils/hex';
+import { AppIcon } from './AppIcon';
 
 type IdentityDetailsPageProps = {
   public_key: string;
@@ -121,18 +122,32 @@ export function IdentityDetailsPage({
               _pressed={{ bg: 'brand.600' }}
               onPress={() => void handle_copy_public_key()}
             >
-              Copy Public Key
+              <HStack alignItems="center" space={2}>
+                <AppIcon color="#ffffff" name="copy" size={18} weight="regular" />
+                <Text color="white" fontSize="sm" fontWeight="semibold">
+                  Copy Public Key
+                </Text>
+              </HStack>
             </Button>
             <Button
               flex={1}
               variant="outline"
               borderColor="brand.500"
-              _text={{ color: 'brand.500' }}
               onPress={() => void handle_export_private_key()}
               isLoading={is_exporting_private_key}
               isLoadingText="Exporting"
             >
-              Download Private Key
+              <HStack alignItems="center" space={2}>
+                <AppIcon
+                  color="#13ae80"
+                  name="download-simple"
+                  size={18}
+                  weight="regular"
+                />
+                <Text color="brand.500" fontSize="sm" fontWeight="semibold">
+                  Download Private Key
+                </Text>
+              </HStack>
             </Button>
           </HStack>
 

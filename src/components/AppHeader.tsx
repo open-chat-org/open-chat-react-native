@@ -1,8 +1,11 @@
-import { Box, Button, HStack, Heading, Text, VStack } from 'native-base';
+import { Box, HStack, Heading, Text, VStack } from 'native-base';
 import { ThemeMode } from '../app/theme/theme';
+import { AppIconName } from '../types/icon.types';
+import { MotionIconButton } from './MotionIconButton';
 
 type HeaderAction = {
-  label: string;
+  icon: AppIconName;
+  label?: string;
   on_press?: () => void;
   tone?: 'primary' | 'secondary';
 };
@@ -34,19 +37,18 @@ export function AppHeader({
     <HStack alignItems="center" justifyContent="space-between" space={3}>
       <HStack flex={1} alignItems="center" space={3}>
         {can_go_back ? (
-          <Button
+          <MotionIconButton
+            accessibility_label="Go back"
             bg={secondary_button_bg}
-            borderWidth={1}
-            borderColor={secondary_button_border}
-            _text={{ color: is_dark ? 'surface.50' : 'surface.900', fontSize: 'md' }}
-            px={3}
-            h="40px"
-            minW="40px"
+            border_color={secondary_button_border}
+            border_width={1}
+            icon_color={is_dark ? '#d8e3ea' : '#17212b'}
+            icon_name="caret-left"
+            icon_size={18}
             shadow={is_dark ? 0 : 1}
-            onPress={on_go_back}
-          >
-            {'<'}
-          </Button>
+            on_press={on_go_back}
+            size={40}
+          />
         ) : null}
 
         <VStack flex={1} space={1.5}>
@@ -99,24 +101,20 @@ export function AppHeader({
             const is_primary = action.tone === 'primary';
 
             return (
-              <Button
-                key={action.label}
+              <MotionIconButton
+                key={`${action.icon}-${action.label ?? 'action'}`}
+                accessibility_label={action.label}
                 bg={is_primary ? 'brand.500' : secondary_button_bg}
-                borderWidth={is_primary ? 0 : 1}
-                borderColor={secondary_button_border}
-                _text={{
-                  color: is_primary ? 'white' : is_dark ? 'surface.50' : 'surface.900',
-                  fontSize: action.label === '...' ? 'md' : 'lg',
-                  fontWeight: 'bold',
-                }}
-                px={3}
-                h="40px"
-                minW="40px"
+                border_color={is_primary ? undefined : secondary_button_border}
+                border_width={is_primary ? 0 : 1}
+                icon_color={is_primary ? '#ffffff' : is_dark ? '#d8e3ea' : '#17212b'}
+                icon_name={action.icon}
+                icon_size={18}
+                icon_weight={is_primary ? 'bold' : 'regular'}
                 shadow={is_dark ? 0 : 1}
-                onPress={action.on_press}
-              >
-                {action.label}
-              </Button>
+                on_press={action.on_press}
+                size={40}
+              />
             );
           })}
         </HStack>

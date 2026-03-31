@@ -4,14 +4,15 @@ import { ChatSummary } from '../types/chat.types';
 
 type ChatListItemProps = {
   chat: ChatSummary;
+  on_press: () => void;
   theme_mode: ThemeMode;
 };
 
-export function ChatListItem({ chat, theme_mode }: ChatListItemProps) {
+export function ChatListItem({ chat, on_press, theme_mode }: ChatListItemProps) {
   const is_dark = theme_mode === 'dark';
 
   return (
-    <Pressable>
+    <Pressable onPress={on_press}>
       <Box
         px={3}
         py={3}

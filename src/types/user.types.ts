@@ -14,3 +14,14 @@ export type SaveUserProfilePayload = {
   quote: string;
   username: string;
 };
+
+export type SignedUserProfilePayload = SaveUserProfilePayload & {
+  profile_hash: string;
+  profile_signature: string;
+};
+
+export type UserSearchResult = {
+  name: string | null;
+  public_key: string;
+  username: string | null;
+};

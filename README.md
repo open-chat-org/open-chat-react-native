@@ -82,6 +82,80 @@ src/
 - API contracts must be small and explicit.
 - Keep request payloads minimal and validate them before sending.
 
+## Realtime Architecture
+
+The frontend realtime layer is a reusable transport component that sits above screens and below feature logic.
+
+It is responsible for the signed websocket handshake, connection lifecycle, reconnect behavior, ack handling, and event dispatch. Screens and features should consume realtime through hooks and store state, not by opening websocket connections directly.
+
+### Realtime Flow
+
+The frontend realtime flow works like this:
+
+1. Load the local identity from secure storage.
+2. Fetch the backend server public key.
+3. Request `POST /realtime/challenge` with `x-public-key`.
+4. Verify the returned `server_signature` with the known server public key.
+5. Sign the canonical challenge message with the local private key.
+6. Open the websocket connection to `/realtime`.
+7. Send the first frame as `auth.connect`.
+8. Store the returned `session_id` locally for reconnect.
+9. Auto-send `delivery.ack` for reliable inbound envelopes.
+10. Reconnect with a fresh challenge and the previous `last_session_id` when the socket drops.
+
+### Realtime Responsibilities
+
+- Realtime client: own websocket creation, auth, reconnect, and frame parsing.
+- Zustand store: hold connection state and event subscription dispatch.
+- Provider: start and stop the realtime client for the authenticated app tree.
+- Hooks: expose connection status, connect or disconnect actions, and event subscriptions to screens and features.
+
+### Realtime Files
+
+Use this structure for frontend realtime work:
+
+```text
+src/
+  app/
+    context/
+      realtime.context.tsx
+  hooks/
+    useRealtime.ts
+    useRealtimeStatus.ts
+    useRealtimeEvent.ts
+  store/
+    realtime.store.ts
+  shared/
+    services/
+      realtime/
+        realtime.api.ts
+        realtime.client.ts
+        realtime.utils.ts
+  types/
+    realtime.types.ts
+```
+
+File responsibilities:
+
+- `realtime.context.tsx`: mounts the app-wide realtime provider and exposes connect, disconnect, send, and subscribe actions.
+- `useRealtime.ts`: gives access to realtime actions from the provider.
+- `useRealtimeStatus.ts`: reads realtime connection and session state from Zustand.
+- `useRealtimeEvent.ts`: subscribes to incoming realtime event types.
+- `realtime.store.ts`: keeps connection state and dispatches inbound events to subscribers.
+- `realtime.api.ts`: calls the backend challenge endpoint.
+- `realtime.client.ts`: performs the signed handshake, websocket lifecycle, reconnect, and ack behavior.
+- `realtime.utils.ts`: builds the canonical challenge message and websocket URL and provides small realtime helpers.
+- `realtime.types.ts`: contains the shared frame, envelope, and connection status types.
+
+### Realtime Rules
+
+- Do not open websocket connections directly inside screens.
+- Do not put signed auth or reconnect logic inside UI components.
+- Always verify the backend challenge signature before sending `auth.connect`.
+- Always sign the websocket challenge with the local private key only.
+- Keep reliable envelope handling centralized in the realtime client.
+- Future chat features should subscribe to realtime events through hooks instead of importing websocket internals.
+
 ## Message Flow Rules
 
 When the chat flow is implemented, it should follow this shape:

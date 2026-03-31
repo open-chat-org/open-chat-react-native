@@ -41,6 +41,7 @@ export function SettingsPanel({
           </Text>
           <SettingsMenuItem
             description="Edit username, name, quote, phone, and email."
+            icon="user-circle"
             on_press={on_open_profile}
             theme_mode={theme_mode}
             title="Profile Details"
@@ -58,6 +59,7 @@ export function SettingsPanel({
           </Text>
           <SettingsMenuItem
             description="View your public key, scan its QR code, and download your private key."
+            icon="key"
             on_press={on_open_details}
             theme_mode={theme_mode}
             title="Details"
